@@ -1,23 +1,14 @@
-/*
- * Ext JS Library 0.30
- * Copyright(c) 2006-2009, Ext JS, LLC.
- * licensing@extjs.com
- *
- * http://extjs.com/license
- */
-
-// custom menu item to contain Ext trees
-Ext.menu.TreeItem = Ext.extend(Ext.menu.Adapter, {
+Ext.menu.TreeItem = Ext.extend(Ext.tree.TreePanel, {
     constructor : function(config){
         Ext.menu.TreeItem.superclass.constructor.call(this, config.tree, config);
-        this.tree = this.component;
+        this.tree = this;
         this.addEvents('selectionchange');
 
-        this.tree.on("render", function(tree){
-            tree.body.swallowEvent(['click','keydown', 'keypress', 'keyup']);
+        this.on("render", function(tree){
+            this.body.swallowEvent(['click','keydown', 'keypress', 'keyup']);
         });
 
-        this.tree.getSelectionModel().on("selectionchange", this.onSelect, this);
+        this.getSelectionModel().on("selectionchange", this.onSelect, this);
     },
 
     onSelect : function(tree, sel){
@@ -35,10 +26,10 @@ Ext.menu.TreeMenu = Ext.extend(Ext.menu.Menu, {
 
     constructor : function(config){
         Ext.menu.TreeMenu.superclass.constructor.call(this, config);
-        this.treeItem = new Ext.menu.TreeItem(config);
-        this.add(this.treeItem);
+        this.add(config.tree);
 
-        this.tree = this.treeItem.tree;
+        this.treeItem = config.tree;
+        this.tree = config.tree;
         this.tree.on('click', this.onNodeClick, this);
         this.relayEvents(this.treeItem, ["selectionchange"]);
     },
