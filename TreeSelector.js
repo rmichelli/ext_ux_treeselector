@@ -2,13 +2,13 @@
  * Ext JS Library 0.30
  * Copyright(c) 2006-2009, Ext JS, LLC.
  * licensing@extjs.com
- * 
+ *
  * http://extjs.com/license
  */
 
 // custom menu item to contain Ext trees
 Ext.menu.TreeItem = Ext.extend(Ext.menu.Adapter, {
-	constructor : function(config){
+    constructor : function(config){
         Ext.menu.TreeItem.superclass.constructor.call(this, config.tree, config);
         this.tree = this.component;
         this.addEvents('selectionchange');
@@ -29,8 +29,8 @@ Ext.menu.TreeItem = Ext.extend(Ext.menu.Adapter, {
 // custom menu containing a single tree
 Ext.menu.TreeMenu = Ext.extend(Ext.menu.Menu, {
     cls:'x-tree-menu',
-	keyNav: true,
-	hideOnClick:false,
+    keyNav: true,
+    hideOnClick:false,
     plain: true,
 
     constructor : function(config){
@@ -47,83 +47,83 @@ Ext.menu.TreeMenu = Ext.extend(Ext.menu.Menu, {
     beforeDestroy : function() {
         this.tree.destroy();
     },
-	
-	onNodeClick : function(node, e){
-		if(!node.attributes.isFolder){
-			this.treeItem.handleClick(e);
-		}
-	}
+
+    onNodeClick : function(node, e){
+        if(!node.attributes.isFolder){
+            this.treeItem.handleClick(e);
+        }
+    }
 });
 
 
 // custom form field for displaying a tree, similar to select or combo
 Ext.ux.TreeSelector = Ext.extend(Ext.form.TriggerField, {
-	initComponent : function(){
-		Ext.ux.TreeSelector.superclass.initComponent.call(this);
-		this.addEvents('selectionchange');
+    initComponent : function(){
+        Ext.ux.TreeSelector.superclass.initComponent.call(this);
+        this.addEvents('selectionchange');
 
-		this.tree.getSelectionModel().on('selectionchange', this.onSelection, this);
-		this.tree.on({
-			'expandnode': this.sync,
-			'collapsenode' : this.sync,
-			'append' : this.sync,
-			'remove' : this.sync,
-			'insert' : this.sync,
-			scope: this
-		});
-		this.on('focus', this.onTriggerClick, this);
+        this.tree.getSelectionModel().on('selectionchange', this.onSelection, this);
+        this.tree.on({
+            'expandnode': this.sync,
+            'collapsenode' : this.sync,
+            'append' : this.sync,
+            'remove' : this.sync,
+            'insert' : this.sync,
+            scope: this
+        });
+        this.on('focus', this.onTriggerClick, this);
     },
 
-	sync : function(){
-		if(this.menu && this.menu.isVisible()){
-			if(this.tree.body.getHeight() > this.maxHeight){
-				this.tree.body.setHeight(this.maxHeight);
-				this.restricted = true;
-			}else if(this.restricted && this.tree.body.dom.firstChild.offsetHeight < this.maxHeight){
-				this.tree.body.setHeight('');
-				this.restricted = false;
-			}
-			this.menu.el.sync();
-		}
-	},
+    sync : function(){
+        if(this.menu && this.menu.isVisible()){
+            if(this.tree.body.getHeight() > this.maxHeight){
+                this.tree.body.setHeight(this.maxHeight);
+                this.restricted = true;
+            }else if(this.restricted && this.tree.body.dom.firstChild.offsetHeight < this.maxHeight){
+                this.tree.body.setHeight('');
+                this.restricted = false;
+            }
+            this.menu.el.sync();
+        }
+    },
 
-	onSelection : function(tree, node){
-		if(!node){
-			this.setRawValue('');
-		}else{
-			this.setRawValue(node.text);
-		}
-	},
+    onSelection : function(tree, node){
+        if(!node){
+            this.setRawValue('');
+        }else{
+            this.setRawValue(node.text);
+        }
+    },
 
-	initEvents : function(){
-		Ext.ux.TreeSelector.superclass.initEvents.call(this);
-		this.el.on('mousedown', this.onTriggerClick, this);
-		this.el.on("keydown", this.onKeyDown,  this);
-	},
+    initEvents : function(){
+        Ext.ux.TreeSelector.superclass.initEvents.call(this);
+        this.el.on('mousedown', this.onTriggerClick, this);
+        this.el.on("keydown", this.onKeyDown,  this);
+    },
 
-	onKeyDown : function(e){
-		if(e.getKey() == e.DOWN){
-			this.onTriggerClick();
-		}
-	},
+    onKeyDown : function(e){
+        if(e.getKey() == e.DOWN){
+            this.onTriggerClick();
+        }
+    },
 
     validateBlur : function(){
         return !this.menu || !this.menu.isVisible();
     },
 
     getValue : function(){
-		var sm = this.tree.getSelectionModel();
-		var s = sm.getSelectedNode();
+        var sm = this.tree.getSelectionModel();
+        var s = sm.getSelectedNode();
         return s ? s.id : '';
     },
 
     setValue : function(id){
-		var n = this.tree.getNodeById(id);
-		if(n){
-			n.select();
-		}else{
-			this.tree.getSelectionModel().clearSelections();
-		}
+        var n = this.tree.getNodeById(id);
+        if(n){
+            n.select();
+        }else{
+            this.tree.getSelectionModel().clearSelections();
+        }
     },
 
     // private
@@ -137,7 +137,7 @@ Ext.ux.TreeSelector = Ext.extend(Ext.form.TriggerField, {
         Ext.ux.TreeSelector.superclass.onDestroy.call(this);
     },
 
-	// private
+    // private
     menuListeners : {
         show : function(){ // retain focus styling
             this.onFocus();
@@ -151,7 +151,7 @@ Ext.ux.TreeSelector = Ext.extend(Ext.form.TriggerField, {
     },
 
     onTriggerClick : function(){
-		if(this.disabled){
+        if(this.disabled){
             return;
         }
         this.menu.on(Ext.apply({}, this.menuListeners, {
@@ -159,54 +159,54 @@ Ext.ux.TreeSelector = Ext.extend(Ext.form.TriggerField, {
         }));
 
         this.menu.show(this.el, "tl-bl?");
-		this.sync();
-		var sm = this.tree.getSelectionModel();
-		var selected = sm.getSelectedNode();
-		if(selected){
-			selected.ensureVisible();
-			sm.activate.defer(250, sm, [selected]);
-		}
+        this.sync();
+        var sm = this.tree.getSelectionModel();
+        var selected = sm.getSelectedNode();
+        if(selected){
+            selected.ensureVisible();
+            sm.activate.defer(250, sm, [selected]);
+        }
     },
 
     beforeBlur : function(){
         //
     },
 
-	onRender : function(){
-		Ext.ux.TreeSelector.superclass.onRender.apply(this, arguments);
-		this.menu = new Ext.menu.TreeMenu(Ext.apply(this.menuConfig || {}, {tree: this.tree}));
-		this.menu.render();
+    onRender : function(){
+        Ext.ux.TreeSelector.superclass.onRender.apply(this, arguments);
+        this.menu = new Ext.menu.TreeMenu(Ext.apply(this.menuConfig || {}, {tree: this.tree}));
+        this.menu.render();
 
-		this.tree.body.addClass('x-tree-selector');
-	},
+        this.tree.body.addClass('x-tree-selector');
+    },
 
-	readOnly: true
+    readOnly: true
 });
 
 /*
  * Custom tree keyboard navigation that supports node navigation without selection
  */
 Ext.tree.ActivationModel = Ext.extend(Ext.tree.DefaultSelectionModel, {
-	select : function(node){
+    select : function(node){
         return this.activate(Ext.tree.ActivationModel.superclass.select.call(this, node));
     },
-    
+
     activate : function(node){
-		if(!node){
-			return;
-		}
-		if(this.activated != node) {
-			if(this.activated){
-				this.activated.ui.removeClass('x-tree-activated');
-			}
-			this.activated = node;
-			node.ui.addClass('x-tree-activated');
-		}
-		node.ui.focus();
-		return node;	
-	},
-	
-	activatePrevious : function(){
+        if(!node){
+            return;
+        }
+        if(this.activated != node) {
+            if(this.activated){
+                this.activated.ui.removeClass('x-tree-activated');
+            }
+            this.activated = node;
+            node.ui.addClass('x-tree-activated');
+        }
+        node.ui.focus();
+        return node;
+    },
+
+    activatePrevious : function(){
         var s = this.activated;
         if(!s){
             return null;
