@@ -1,18 +1,27 @@
+/*!
+ * Enhanced ExtJS Adapter for Adobe(r) AIR(r)
+ * Copyright(c) 2006-2010 Sencha Inc.
+ * licensing@extjs.com
+ * http://www.extjs.com/license
+ *
+ * @version 3.2.2 - modified
+ * [For Use with ExtJS 3.1.0 to ExtJS 3.2.2]
+ */
 Ext.menu.TreeItem = Ext.extend(Ext.tree.TreePanel, {
     constructor : function(config){
         Ext.menu.TreeItem.superclass.constructor.call(this, config.tree, config);
         this.tree = this;
         this.addEvents('selectionchange');
 
-        this.on("render", function(tree){
+        this.on('render', function(tree){
             this.body.swallowEvent(['click','keydown', 'keypress', 'keyup']);
         });
 
-        this.getSelectionModel().on("selectionchange", this.onSelect, this);
+        this.getSelectionModel().on('selectionchange', this.onSelect, this);
     },
 
     onSelect : function(tree, sel){
-        this.fireEvent("select", this, sel, tree);
+        this.fireEvent('select', this, sel, tree);
     }
 });
 
@@ -31,7 +40,7 @@ Ext.menu.TreeMenu = Ext.extend(Ext.menu.Menu, {
         this.treeItem = config.tree;
         this.tree = config.tree;
         this.tree.on('click', this.onNodeClick, this);
-        this.relayEvents(this.treeItem, ["selectionchange"]);
+        this.relayEvents(this.treeItem, ['selectionchange']);
     },
 
     // private
@@ -41,7 +50,9 @@ Ext.menu.TreeMenu = Ext.extend(Ext.menu.Menu, {
 
     onNodeClick : function(node, e){
         if(!node.attributes.isFolder){
-            this.treeItem.handleClick(e);
+            this.treeItem.getSelectionModel().select(node);
+            this.hide();
+            this.focus();
         }
     }
 });
@@ -62,7 +73,7 @@ Ext.ux.TreeSelector = Ext.extend(Ext.form.TriggerField, {
             'insert' : this.sync,
             scope: this
         });
-        this.on('focus', this.onTriggerClick, this);
+        //this.on('focus', this.onTriggerClick, this);  // with this in place, menu would hide and immediately re-show when tree was visible, an item was already selected, and click was made outside the tree
     },
 
     sync : function(){
@@ -89,7 +100,7 @@ Ext.ux.TreeSelector = Ext.extend(Ext.form.TriggerField, {
     initEvents : function(){
         Ext.ux.TreeSelector.superclass.initEvents.call(this);
         this.el.on('mousedown', this.onTriggerClick, this);
-        this.el.on("keydown", this.onKeyDown,  this);
+        this.el.on('keydown', this.onKeyDown,  this);
     },
 
     onKeyDown : function(e){
@@ -136,8 +147,8 @@ Ext.ux.TreeSelector = Ext.extend(Ext.form.TriggerField, {
         hide : function(){
             this.focus.defer(10, this);
             var ml = this.menuListeners;
-            this.menu.un("show", ml.show,  this);
-            this.menu.un("hide", ml.hide,  this);
+            this.menu.un('show', ml.show,  this);
+            this.menu.un('hide', ml.hide,  this);
         }
     },
 
@@ -149,13 +160,16 @@ Ext.ux.TreeSelector = Ext.extend(Ext.form.TriggerField, {
             scope:this
         }));
 
-        this.menu.show(this.el, "tl-bl?");
+        this.menu.show(this.el, 'tl-bl?');
         this.sync();
         var sm = this.tree.getSelectionModel();
         var selected = sm.getSelectedNode();
         if(selected){
             selected.ensureVisible();
-            sm.activate.defer(250, sm, [selected]);
+            //sm.activate.defer(250, sm, [selected]);   // this fails if DefaultSelectionModel is used, now protected with the check below
+            if (typeof sm.activate == 'function') {
+                sm.activate.defer(250, sm, [selected]); // not modified to work with MultiSelectionModel
+            }
         }
     },
 

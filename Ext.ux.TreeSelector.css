@@ -1,0 +1,9 @@
+.x-tree-selector .x-tree-node-el {
+    border:1px solid #fff;
+}
+.x-tree-selector .x-tree-activated {
+    border:1px dotted #999 !important;
+}
+.x-tree-menu {
+   padding:0 !important;
+}
