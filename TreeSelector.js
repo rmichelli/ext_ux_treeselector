@@ -1,62 +1,28 @@
-/*!
- * Enhanced ExtJS Adapter for Adobe(r) AIR(r)
- * Copyright(c) 2006-2010 Sencha Inc.
- * licensing@extjs.com
- * http://www.extjs.com/license
- *
- * @version 3.2.2 - modified
- * [For Use with ExtJS 3.1.0 to ExtJS 3.2.2]
- */
-Ext.menu.TreeItem = Ext.extend(Ext.tree.TreePanel, {
-    constructor : function(config){
-        Ext.menu.TreeItem.superclass.constructor.call(this, config.tree, config);
-        this.tree = this;
-        this.addEvents('selectionchange');
-
-        this.on('render', function(tree){
-            this.body.swallowEvent(['click','keydown', 'keypress', 'keyup']);
-        });
-
-        this.getSelectionModel().on('selectionchange', this.onSelect, this);
-    },
-
-    onSelect : function(tree, sel){
-        this.fireEvent('select', this, sel, tree);
-    }
-});
-
+/*
+* Based on TreeSelector.js from Extjs Air 3.3.0 package
+*
+* @version 3.3.3 - modified from 3.2.2
+* [For Use with ExtJS 3.3.3]
+*/
 
 // custom menu containing a single tree
 Ext.menu.TreeMenu = Ext.extend(Ext.menu.Menu, {
     cls:'x-tree-menu',
-    keyNav: true,
-    hideOnClick:false,
     plain: true,
 
     constructor : function(config){
         Ext.menu.TreeMenu.superclass.constructor.call(this, config);
         this.add(config.tree);
 
-        this.treeItem = config.tree;
         this.tree = config.tree;
-        this.tree.on('click', this.onNodeClick, this);
-        this.relayEvents(this.treeItem, ['selectionchange']);
+        this.relayEvents(this.tree, ['selectionchange']);
     },
 
     // private
     beforeDestroy : function() {
         this.tree.destroy();
-    },
-
-    onNodeClick : function(node, e){
-        if(!node.attributes.isFolder){
-            this.treeItem.getSelectionModel().select(node);
-            this.hide();
-            this.focus();
-        }
     }
 });
-
 
 // custom form field for displaying a tree, similar to select or combo
 Ext.ux.TreeSelector = Ext.extend(Ext.form.TriggerField, {
@@ -73,7 +39,6 @@ Ext.ux.TreeSelector = Ext.extend(Ext.form.TriggerField, {
             'insert' : this.sync,
             scope: this
         });
-        //this.on('focus', this.onTriggerClick, this);  // with this in place, menu would hide and immediately re-show when tree was visible, an item was already selected, and click was made outside the tree
     },
 
     sync : function(){
@@ -149,6 +114,21 @@ Ext.ux.TreeSelector = Ext.extend(Ext.form.TriggerField, {
             var ml = this.menuListeners;
             this.menu.un('show', ml.show,  this);
             this.menu.un('hide', ml.hide,  this);
+        },
+        beforeshow: function (menu) {
+            // sync menu width with full width of field
+            var cWidth = menu.el.getWidth(), dWidth = this.wrap.getWidth();
+            if(cWidth !== dWidth){
+                menu.el.setWidth(dWidth);
+            }
+            // patch for 3.3.3 where tree's toolbars may have 0 width
+            var tWidth = this.tree.getWidth();
+            Ext.each(this.tree.toolbars, function (tbar) {
+                if(tbar.getWidth() !== tWidth){
+                    tbar.setWidth(tWidth);
+                    tbar.el.parent().setWidth(tWidth);
+                }
+            });
         }
     },
 
@@ -166,8 +146,7 @@ Ext.ux.TreeSelector = Ext.extend(Ext.form.TriggerField, {
         var selected = sm.getSelectedNode();
         if(selected){
             selected.ensureVisible();
-            //sm.activate.defer(250, sm, [selected]);   // this fails if DefaultSelectionModel is used, now protected with the check below
-            if (typeof sm.activate == 'function') {
+            if (typeof sm.activate == 'function') {     // sm.activate not defined for DefaultSelectionModel
                 sm.activate.defer(250, sm, [selected]); // not modified to work with MultiSelectionModel
             }
         }
@@ -188,9 +167,10 @@ Ext.ux.TreeSelector = Ext.extend(Ext.form.TriggerField, {
     readOnly: true
 });
 
-/*
- * Custom tree keyboard navigation that supports node navigation without selection
- */
+// Custom tree keyboard navigation that supports node navigation without selection
+//
+// TO DO: Make this work with MultiSelectionModel
+
 Ext.tree.ActivationModel = Ext.extend(Ext.tree.DefaultSelectionModel, {
     select : function(node){
         return this.activate(Ext.tree.ActivationModel.superclass.select.call(this, node));
@@ -290,6 +270,8 @@ Ext.tree.ActivationModel = Ext.extend(Ext.tree.DefaultSelectionModel, {
                      this.activate(s.parentNode, e);
                  }
              break;
-        };
+        }
     }
 });
+
+Ext.reg('Ext.ux.TreeSelector', Ext.ux.TreeSelector);
