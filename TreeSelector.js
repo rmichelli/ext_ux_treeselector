@@ -105,8 +105,16 @@ Ext.ux.TreeSelector = Ext.extend(Ext.form.TriggerField, {
     },
 
     // private
+    collapseIf : function(e){
+        if(!this.isDestroyed && !e.within(this.menu.el)){
+            this.menu.hide();
+        }
+    },
+
+    // private
     menuListeners : {
         show : function(){ // retain focus styling
+            this.mon(Ext.getDoc(), 'mousewheel', this.collapseIf, this);
             this.onFocus();
         },
         hide : function(){
@@ -114,21 +122,7 @@ Ext.ux.TreeSelector = Ext.extend(Ext.form.TriggerField, {
             var ml = this.menuListeners;
             this.menu.un('show', ml.show,  this);
             this.menu.un('hide', ml.hide,  this);
-        },
-        beforeshow: function (menu) {
-            // sync menu width with full width of field
-            var cWidth = menu.el.getWidth(), dWidth = this.wrap.getWidth();
-            if(cWidth !== dWidth){
-                menu.el.setWidth(dWidth);
-            }
-            // patch for 3.3.3 where tree's toolbars may have 0 width
-            var tWidth = this.tree.getWidth();
-            Ext.each(this.tree.toolbars, function (tbar) {
-                if(tbar.getWidth() !== tWidth){
-                    tbar.setWidth(tWidth);
-                    tbar.el.parent().setWidth(tWidth);
-                }
-            });
+            this.mun(Ext.getDoc(), 'mousewheel', this.collapseIf, this);
         }
     },
 
@@ -159,6 +153,21 @@ Ext.ux.TreeSelector = Ext.extend(Ext.form.TriggerField, {
     onRender : function(){
         Ext.ux.TreeSelector.superclass.onRender.apply(this, arguments);
         this.menu = new Ext.menu.TreeMenu(Ext.apply(this.menuConfig || {}, {tree: this.tree}));
+        this.menu.on('beforeshow', function (menu) {
+            // sync menu width with full width of field
+            var cWidth = menu.el.getWidth(), dWidth = this.wrap.getWidth();
+            if(cWidth !== dWidth){
+                menu.el.setWidth(dWidth);
+            }
+            // patch for 3.3.3 where tree's toolbars may have 0 width
+            var tWidth = this.tree.getWidth();
+            Ext.each(this.tree.toolbars, function (tbar) {
+                if(tbar.getWidth() !== tWidth){
+                    tbar.setWidth(tWidth);
+                    tbar.el.parent().setWidth(tWidth);
+                }
+            });
+        }, this);
         this.menu.render();
 
         this.tree.body.addClass('x-tree-selector');
