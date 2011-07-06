@@ -11,10 +11,11 @@ Ext.menu.TreeMenu = Ext.extend(Ext.menu.Menu, {
     plain: true,
 
     constructor : function(config){
-        Ext.menu.TreeMenu.superclass.constructor.call(this, config);
-        this.add(config.tree);
+        var _tree = config.tree; delete config.tree;
 
-        this.tree = config.tree;
+        Ext.menu.TreeMenu.superclass.constructor.call(this, config);
+
+        this.add(Ext.apply(_tree, { ref: 'tree' }));
         this.relayEvents(this.tree, ['selectionchange']);
     },
 
@@ -193,11 +194,11 @@ Ext.ux.TreeSelector = Ext.extend(Ext.form.TriggerField, {
         //
     },
 
-    onRender : function(){
-        Ext.ux.TreeSelector.superclass.onRender.apply(this, arguments);
-        this.menu = new Ext.menu.TreeMenu(Ext.apply(this.menuConfig || {}, {tree: this.tree}));
+    afterRender : function(){
+        Ext.ux.TreeSelector.superclass.afterRender.apply(this, arguments);
+        this.menu = new Ext.menu.TreeMenu(Ext.apply(this.menuConfig || {}, { tree: this.tree, width: this.wrap.getWidth() }));
         this.menu.on('beforeshow', function (menu) {
-            // sync menu width with full width of field
+            // sync menu width with full width of field - the above menu width config is may not be accurate (but must be provided, especially for IE6)
             var cWidth = menu.el.getWidth(), dWidth = this.wrap.getWidth();
             if(cWidth !== dWidth){
                 menu.el.setWidth(dWidth);
