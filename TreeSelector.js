@@ -32,13 +32,19 @@ Ext.ux.TreeSelector = Ext.extend(Ext.form.TriggerField, {
 
         this.tree.getSelectionModel().on('selectionchange', this.onSelection, this);
         this.tree.on({
+            'beforeexpandnode' : this.syncNodeDisplay,
             'expandnode': this.sync,
             'collapsenode' : this.sync,
             'append' : this.sync,
             'remove' : this.sync,
             'insert' : this.sync,
+            'load'   : this.syncSelection,
             scope: this
         });
+
+        // Ensure load syncSelection is always called first
+        var ls = this.tree.events.load.listeners;
+        if (ls && ls.length > 1) { ls.unshift(ls.pop()); }
     },
 
     sync : function(){
@@ -51,6 +57,43 @@ Ext.ux.TreeSelector = Ext.extend(Ext.form.TriggerField, {
                 this.restricted = false;
             }
             this.menu.el.sync();
+        }
+    },
+
+    syncSelection: function(node){
+        if(node === this.tree.getRootNode()){
+            var sm = this.tree.getSelectionModel(),
+            selNodes = (sm.getSelectedNode || sm.getSelectedNodes).call(sm),    // work with both default and multi selection models
+            matchNode;
+
+            if(Ext.isEmpty(selNodes)){
+                selNodes = [];
+            }
+            if(!Ext.isArray(selNodes)) {
+                selNodes = [selNodes];
+            }
+
+            sm.clearSelections();
+
+            Ext.each(selNodes, function(item){
+                matchNode = this.tree.getNodeById(item.id); // selections are stale, use id to locate and select actual node
+                if(matchNode){
+                    sm.select(matchNode);
+                }
+            }, this);
+        }
+    },
+
+    syncNodeDisplay: function(node){
+        if (!node.childrenRendered){
+            var sm = this.tree.getSelectionModel();
+            node.on('expand', function(){
+                this.eachChild(function(child){
+                    if(sm.isSelected(child) && child.rendered){
+                        child.ui.addClass("x-tree-selected");   // adds selected display after child is rendered, as it can not be added prior
+                    }
+                });
+            }, node, { single: true });
         }
     },
 
